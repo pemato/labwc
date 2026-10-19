@@ -1644,8 +1644,14 @@ This is the full list of interfaces that can be controlled with this mechanism:
 - `ext_session_lock_manager_v1`
 - `zwlr_layer_shell_v1`
 - `ext_workspace_manager_v1`
+- `lab_toplevel_workspace_manager_v1`
 - `ext_image_copy_capture_manager_v1`
 - `ext_output_image_capture_source_manager_v1`
+
+Note: lab_toplevel_workspace_manager_v1 is a labwc-specific protocol that
+reports the workspace each window is on. Waybar's wlr/taskbar needs it, in
+addition to zwlr_foreign_toplevel_manager_v1 and ext_workspace_manager_v1, to
+show exact workspace membership in its group-by-workspace view.
 
 ## ENVIRONMENT VARIABLES
 
