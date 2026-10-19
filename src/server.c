@@ -60,6 +60,7 @@
 #include "config/session.h"
 #include "decorations.h"
 #include "desktop-entry.h"
+#include "foreign-toplevel/lab-workspace.h"
 #include "idle.h"
 #include "input/keyboard.h"
 #include "labwc.h"
@@ -795,6 +796,9 @@ server_init(void)
 	server.foreign_toplevel_list =
 		wlr_ext_foreign_toplevel_list_v1_create(
 			server.wl_display, LAB_EXT_FOREIGN_TOPLEVEL_LIST_VERSION);
+
+	server.toplevel_workspace_manager =
+		lab_toplevel_workspace_manager_create(server.wl_display);
 
 	wlr_alpha_modifier_v1_create(server.wl_display);
 
