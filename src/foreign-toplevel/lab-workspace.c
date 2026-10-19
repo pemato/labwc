@@ -24,6 +24,7 @@ struct lab_toplevel_workspace {
 	struct view *view;             /* NULL once inert */
 	struct wl_listener on_workspace;
 	struct wl_listener on_view_destroy;
+	struct wl_listener on_handle_destroy;
 };
 
 static void
@@ -42,6 +43,7 @@ detach(struct lab_toplevel_workspace *tw)
 {
 	wl_list_remove(&tw->on_workspace.link);
 	wl_list_remove(&tw->on_view_destroy.link);
+	wl_list_remove(&tw->on_handle_destroy.link);
 	tw->view = NULL;
 }
 
@@ -68,6 +70,15 @@ handle_view_destroy(struct wl_listener *listener, void *data)
 {
 	struct lab_toplevel_workspace *tw =
 		wl_container_of(listener, tw, on_view_destroy);
+	detach(tw);
+}
+
+static void
+handle_handle_destroy(struct wl_listener *listener, void *data)
+{
+	/* Toplevel closed (unmap): become inert */
+	struct lab_toplevel_workspace *tw =
+		wl_container_of(listener, tw, on_handle_destroy);
 	detach(tw);
 }
 
@@ -130,6 +141,8 @@ manager_get_toplevel_workspace(struct wl_client *client,
 	wl_signal_add(&view->events.workspace, &tw->on_workspace);
 	tw->on_view_destroy.notify = handle_view_destroy;
 	wl_signal_add(&view->events.destroy, &tw->on_view_destroy);
+	tw->on_handle_destroy.notify = handle_handle_destroy;
+	wl_signal_add(&handle->events.destroy, &tw->on_handle_destroy);
 
 	send_enter(tw, view->workspace);
 }
