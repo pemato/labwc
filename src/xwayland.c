@@ -1008,6 +1008,7 @@ xwayland_view_create(struct wlr_xwayland_surface *xsurface, bool mapped)
 	xwayland_view->xwayland_surface = xsurface;
 	xsurface->data = view;
 
+	/* initial placement before map; no foreign toplevel exists yet, so no signal */
 	view->workspace = server.workspaces.current;
 	view->scene_tree = lab_wlr_scene_tree_create(
 		view->workspace->view_trees[VIEW_LAYER_NORMAL]);

@@ -1040,6 +1040,7 @@ handle_new_xdg_toplevel(struct wl_listener *listener, void *data)
 			view->output->wlr_output->scale);
 	}
 
+	/* initial placement before map; no foreign toplevel exists yet, so no signal */
 	view->workspace = server.workspaces.current;
 	view->scene_tree = lab_wlr_scene_tree_create(
 		view->workspace->view_trees[VIEW_LAYER_NORMAL]);

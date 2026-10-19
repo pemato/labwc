@@ -1588,10 +1588,12 @@ view_move_to_workspace(struct view *view, struct workspace *workspace)
 {
 	assert(view);
 	assert(workspace);
-	if (view->workspace != workspace) {
+	struct workspace *old = view->workspace;
+	if (old != workspace) {
 		view->workspace = workspace;
 		wlr_scene_node_reparent(&view->scene_tree->node,
 			workspace->view_trees[view->layer]);
+		wl_signal_emit_mutable(&view->events.workspace, old);
 	}
 }
 
@@ -2477,6 +2479,7 @@ view_init(struct view *view)
 	wl_signal_init(&view->events.fullscreened);
 	wl_signal_init(&view->events.activated);
 	wl_signal_init(&view->events.always_on_top);
+	wl_signal_init(&view->events.workspace);
 	wl_signal_init(&view->events.set_icon);
 	wl_signal_init(&view->events.destroy);
 

@@ -17,6 +17,7 @@
 #include "common/list.h"
 #include "common/mem.h"
 #include "common/scene-helpers.h"
+#include "common/string-helpers.h"
 #include "config/rcxml.h"
 #include "input/keyboard.h"
 #include "labwc.h"
@@ -225,6 +226,33 @@ handle_ext_workspace_commit(struct wl_listener *listener, void *data)
 }
 
 /* Internal API */
+
+/*
+ * Returns a heap-allocated ext-workspace id: the name if unused,
+ * otherwise "<name>#<n>" with the smallest unused n >= 2.
+ */
+static char *
+unique_workspace_id(const char *name)
+{
+	char *id = xstrdup(name);
+	for (int n = 2;; n++) {
+		bool taken = false;
+		struct workspace *ws;
+		wl_list_for_each(ws, &server.workspaces.all, link) {
+			if (ws->ext_workspace && ws->ext_workspace->id
+					&& !strcmp(ws->ext_workspace->id, id)) {
+				taken = true;
+				break;
+			}
+		}
+		if (!taken) {
+			return id;
+		}
+		free(id);
+		id = strdup_printf("%s#%d", name, n);
+	}
+}
+
 static void
 add_workspace(const char *name)
 {
@@ -240,9 +268,11 @@ add_workspace(const char *name)
 	wl_list_append(&server.workspaces.all, &workspace->link);
 	wlr_scene_node_set_enabled(&workspace->tree->node, false);
 
+	char *id = unique_workspace_id(name);
 	workspace->ext_workspace = wlr_ext_workspace_handle_v1_create(
-		server.workspaces.ext_manager, /*id*/ NULL,
+		server.workspaces.ext_manager, id,
 		EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_ACTIVATE);
+	free(id);
 	workspace->ext_workspace->data = workspace;
 	wlr_ext_workspace_handle_v1_set_group(
 		workspace->ext_workspace, server.workspaces.ext_group);
@@ -583,6 +613,7 @@ workspaces_reconfigure(void)
 			wlr_log(WLR_DEBUG, "Renaming workspace \"%s\" to \"%s\"",
 				workspace->name, conf->name);
 			xstrdup_replace(workspace->name, conf->name);
+			/* The ext-workspace id is intentionally not updated on rename */
 			wlr_ext_workspace_handle_v1_set_name(
 				workspace->ext_workspace, workspace->name);
 		}
