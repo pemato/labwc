@@ -227,32 +227,6 @@ handle_ext_workspace_commit(struct wl_listener *listener, void *data)
 
 /* Internal API */
 
-/*
- * Returns a heap-allocated ext-workspace id: the name if unused,
- * otherwise "<name>#<n>" with the smallest unused n >= 2.
- */
-static char *
-unique_workspace_id(const char *name)
-{
-	char *id = xstrdup(name);
-	for (int n = 2;; n++) {
-		bool taken = false;
-		struct workspace *ws;
-		wl_list_for_each(ws, &server.workspaces.all, link) {
-			if (ws->ext_workspace && ws->ext_workspace->id
-					&& !strcmp(ws->ext_workspace->id, id)) {
-				taken = true;
-				break;
-			}
-		}
-		if (!taken) {
-			return id;
-		}
-		free(id);
-		id = strdup_printf("%s#%d", name, n);
-	}
-}
-
 static void
 add_workspace(const char *name)
 {
@@ -268,7 +242,13 @@ add_workspace(const char *name)
 	wl_list_append(&server.workspaces.all, &workspace->link);
 	wlr_scene_node_set_enabled(&workspace->tree->node, false);
 
-	char *id = unique_workspace_id(name);
+	/*
+	 * The ext-workspace id is the 1-based position of the workspace.
+	 * Workspaces are only ever added or removed at the end of the list and
+	 * renamed in place, so the id is unique and stable for the lifetime of
+	 * the workspace (and keeps clients that sort by id in configured order).
+	 */
+	char *id = strdup_printf("%zu", wl_list_length(&server.workspaces.all));
 	workspace->ext_workspace = wlr_ext_workspace_handle_v1_create(
 		server.workspaces.ext_manager, id,
 		EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_ACTIVATE);
@@ -613,7 +593,7 @@ workspaces_reconfigure(void)
 			wlr_log(WLR_DEBUG, "Renaming workspace \"%s\" to \"%s\"",
 				workspace->name, conf->name);
 			xstrdup_replace(workspace->name, conf->name);
-			/* The ext-workspace id is intentionally not updated on rename */
+			/* The ext-workspace id is the position, so it does not change on rename */
 			wlr_ext_workspace_handle_v1_set_name(
 				workspace->ext_workspace, workspace->name);
 		}
