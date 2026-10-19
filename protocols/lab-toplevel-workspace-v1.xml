@@ -34,10 +34,9 @@
 
   <interface name="lab_toplevel_workspace_manager_v1" version="1">
     <description summary="manager for toplevel workspace objects">
-      This is a privileged global, gated in the same way as
-      zwlr_foreign_toplevel_manager_v1. Clients that are not permitted to
-      bind zwlr_foreign_toplevel_manager_v1 are not permitted to bind it
-      either.
+      This is a privileged global controlled by its own entry in the
+      compositor's privileged-interface policy. It is only useful together
+      with zwlr_foreign_toplevel_manager_v1 and ext_workspace_manager_v1.
     </description>
 
     <request name="destroy" type="destructor">

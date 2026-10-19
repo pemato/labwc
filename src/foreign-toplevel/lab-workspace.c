@@ -6,7 +6,6 @@
 #include <wlr/types/wlr_ext_workspace_v1.h>
 #include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/util/log.h>
-#include "common/macros.h"
 #include "common/mem.h"
 #include "lab-toplevel-workspace-v1-protocol.h"
 #include "view.h"
