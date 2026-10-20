@@ -305,6 +305,7 @@ process_cursor_move(uint32_t time)
 
 	view_move(view, x, y);
 	overlay_update(&server.seat);
+	edge_warp_update(&server.seat);
 }
 
 static void

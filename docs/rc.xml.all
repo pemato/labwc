@@ -374,6 +374,9 @@
     <!-- time is in ms -->
     <doubleClickTime>500</doubleClickTime>
 
+    <!-- 0 disables switching desktops by dragging a window to the screen edge -->
+    <screenEdgeWarpTime>0</screenEdgeWarpTime>
+
     <context name="Frame">
       <mousebind button="W-Left" action="Press">
         <action name="Focus" />

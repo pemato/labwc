@@ -360,6 +360,7 @@ interactive_cancel(struct view *view)
 	}
 
 	overlay_finish(&server.seat);
+	edge_warp_finish(&server.seat);
 
 	resize_indicator_hide(view);
 

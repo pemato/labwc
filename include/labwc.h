@@ -7,6 +7,7 @@
 #include "common/set.h"
 #include "cycle.h"
 #include "input/cursor.h"
+#include "edge-warp.h"
 #include "overlay.h"
 
 #define XCURSOR_DEFAULT "left_ptr"
@@ -95,6 +96,7 @@ struct seat {
 	} drag;
 
 	struct overlay overlay;
+	struct edge_warp edge_warp;
 	/* Used to prevent region snapping when starting a move with A-Left */
 	bool region_prevent_snap;
 

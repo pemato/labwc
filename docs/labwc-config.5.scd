@@ -915,6 +915,16 @@ input-devices by the Wayland protocol.
 *<mouse><doubleClickTime>*
 	Set double click time in milliseconds. Default is 500.
 
+*<mouse><screenEdgeWarpTime>*
+	While moving a window with the mouse, switch to the desktop on the left
+	or right when the cursor stays at the left or right edge of the screen for
+	this many milliseconds. The window is carried to that desktop and the
+	cursor continues from the opposite side. Releasing the window earlier
+	snaps it to the edge as usual. There is no switch at the left edge of the
+	first desktop and the right edge of the last one, at corners, at edges
+	between outputs, or when edge snapping is disabled (*<snapping><range>*
+	0). Default is 0 (disabled).
+
 *<mouse><context name=""><mousebind button="" direction="" action=""
 overrideInhibition=""><action>*
 	Multiple *<mousebind>* can exist within one *<context>*; and multiple

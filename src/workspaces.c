@@ -441,8 +441,8 @@ workspaces_init(void)
  * when this function is called from desktop_focus_view(), in order to
  * avoid unnecessary extra focus changes and possible recursion.
  */
-void
-workspaces_switch_to(struct workspace *target, bool update_focus)
+static void
+switch_to(struct workspace *target, bool update_focus, bool show_osd)
 {
 	assert(target);
 	if (target == server.workspaces.current) {
@@ -494,7 +494,9 @@ workspaces_switch_to(struct workspace *target, bool update_focus)
 	}
 
 	/* And finally show the OSD */
-	_osd_show();
+	if (show_osd) {
+		_osd_show();
+	}
 
 	/*
 	 * Make sure we are not carrying around a
@@ -508,6 +510,18 @@ workspaces_switch_to(struct workspace *target, bool update_focus)
 	wlr_ext_workspace_handle_v1_set_active(target->ext_workspace, true);
 
 	show_desktop_reset();
+}
+
+void
+workspaces_switch_to(struct workspace *target, bool update_focus)
+{
+	switch_to(target, update_focus, /*show_osd*/ true);
+}
+
+void
+workspaces_switch_to_while_moving(struct workspace *target)
+{
+	switch_to(target, /*update_focus*/ false, /*show_osd*/ false);
 }
 
 void

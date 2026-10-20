@@ -137,6 +137,7 @@ struct rcxml {
 
 	/* mouse */
 	long doubleclick_time;     /* in ms */
+	int screen_edge_warp_time; /* in ms, 0 = disabled */
 	struct wl_list mousebinds; /* struct mousebind.link */
 
 	/* touch tablet */

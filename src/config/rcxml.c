@@ -1263,6 +1263,9 @@ entry(xmlNode *node, char *nodename, char *content)
 		} else {
 			wlr_log(WLR_ERROR, "invalid doubleClickTime");
 		}
+	} else if (!strcasecmp(nodename, "screenEdgeWarpTime.mouse")) {
+		long val = strtol(content, NULL, 10);
+		rc.screen_edge_warp_time = val > 0 ? (int)val : 0;
 	} else if (!strcasecmp(nodename, "scrollFactor.mouse")) {
 		/* This is deprecated. Show an error message in post_processing() */
 		set_double(content, &mouse_scroll_factor);
@@ -1602,6 +1605,7 @@ rcxml_init(void)
 	rc.raise_on_focus_delay_ms = 0;
 
 	rc.doubleclick_time = 500;
+	rc.screen_edge_warp_time = 0;
 
 	rc.tablet.force_mouse_emulation = false;
 	rc.tablet.output_name = NULL;

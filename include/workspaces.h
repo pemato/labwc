@@ -22,6 +22,11 @@ struct workspace {
 
 void workspaces_init(void);
 void workspaces_switch_to(struct workspace *target, bool update_focus);
+/*
+ * Like workspaces_switch_to() during an interactive move: the grabbed view
+ * is carried along, focus is left alone and no OSD is shown.
+ */
+void workspaces_switch_to_while_moving(struct workspace *target);
 void workspaces_destroy(void);
 void workspaces_osd_hide(struct seat *seat);
 struct workspace *workspaces_find(struct workspace *anchor, const char *name,
