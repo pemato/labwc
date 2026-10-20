@@ -32,7 +32,7 @@
     change in incompatible ways.
   </description>
 
-  <interface name="lab_toplevel_workspace_manager_v1" version="1">
+  <interface name="lab_toplevel_workspace_manager_v1" version="2">
     <description summary="manager for toplevel workspace objects">
       This is a privileged global controlled by its own entry in the
       compositor's privileged-interface policy. It is only useful together
@@ -58,7 +58,7 @@
     </request>
   </interface>
 
-  <interface name="lab_toplevel_workspace_v1" version="1">
+  <interface name="lab_toplevel_workspace_v1" version="2">
     <description summary="workspace of a toplevel">
       Reports the workspace a toplevel is on.
 
@@ -82,7 +82,7 @@
 
       Destroying this object stops events; it never affects the toplevel.
 
-      No protocol errors are defined in version 1.
+      No protocol errors are defined. Version 2 adds the move_to_workspace request.
     </description>
 
     <request name="destroy" type="destructor">
@@ -106,5 +106,17 @@
       </description>
       <arg name="workspace_id" type="string"/>
     </event>
+
+    <request name="move_to_workspace" since="2">
+      <description summary="move the toplevel to a workspace">
+        Ask the compositor to move the toplevel to the workspace identified by
+        workspace_id (an ext_workspace_handle_v1.id). The compositor may ignore
+        the request, e.g. if the workspace no longer exists or the toplevel is
+        closed; it never sends a protocol error. On success the usual
+        workspace_leave/workspace_enter events follow. The active workspace is
+        not changed.
+      </description>
+      <arg name="workspace_id" type="string"/>
+    </request>
   </interface>
 </protocol>
