@@ -16,6 +16,7 @@ test_lib = static_library(
     '../src/common/string-helpers.c',
     '../src/common/xml.c',
     '../src/common/parse-bool.c',
+    '../src/common/edge-warp.c',
   ),
   include_directories: [labwc_inc],
   dependencies: test_deps,
@@ -24,6 +25,7 @@ test_lib = static_library(
 tests = [
   'accel',
   'buf-simple',
+  'edge-warp',
   'str',
   'xml',
 ]

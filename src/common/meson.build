@@ -3,6 +3,7 @@ labwc_sources += files(
   'buf.c',
   'dir.c',
   'edge.c',
+  'edge-warp.c',
   'fd-util.c',
   'file-helpers.c',
   'font.c',
