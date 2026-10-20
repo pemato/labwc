@@ -2,16 +2,18 @@
 #include "foreign-toplevel/lab-workspace.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <wayland-server-core.h>
 #include <wlr/types/wlr_ext_workspace_v1.h>
 #include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/util/log.h>
 #include "common/mem.h"
 #include "lab-toplevel-workspace-v1-protocol.h"
+#include "labwc.h"
 #include "view.h"
 #include "workspaces.h"
 
-#define LAB_TOPLEVEL_WORKSPACE_VERSION 1
+#define LAB_TOPLEVEL_WORKSPACE_VERSION 2
 
 struct lab_toplevel_workspace_manager {
 	struct wl_global *global;
@@ -88,8 +90,42 @@ toplevel_workspace_destroy_request(struct wl_client *client,
 	wl_resource_destroy(resource);
 }
 
+static void
+toplevel_workspace_move_to_workspace(struct wl_client *client,
+		struct wl_resource *resource, const char *workspace_id)
+{
+	struct lab_toplevel_workspace *tw = wl_resource_get_user_data(resource);
+	if (!tw->view) {
+		return;
+	}
+
+	struct workspace *target = NULL;
+	struct workspace *workspace;
+	wl_list_for_each(workspace, &server.workspaces.all, link) {
+		if (workspace->ext_workspace && workspace->ext_workspace->id
+				&& !strcmp(workspace->ext_workspace->id, workspace_id)) {
+			target = workspace;
+			break;
+		}
+	}
+	if (!target || target == tw->view->workspace) {
+		return;
+	}
+
+	wlr_log(WLR_DEBUG, "toplevel workspace: move request '%s' -> '%s'",
+		tw->view->workspace ? tw->view->workspace->name : "(none)",
+		target->name);
+	view_move_to_workspace(tw->view, target);
+
+	/* Like SendToDesktop follow="no": keep focus off other desktops */
+	if (server.active_view == tw->view) {
+		desktop_focus_topmost_view();
+	}
+}
+
 static const struct lab_toplevel_workspace_v1_interface toplevel_workspace_impl = {
 	.destroy = toplevel_workspace_destroy_request,
+	.move_to_workspace = toplevel_workspace_move_to_workspace,
 };
 
 static void

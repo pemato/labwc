@@ -1651,7 +1651,10 @@ This is the full list of interfaces that can be controlled with this mechanism:
 Note: lab_toplevel_workspace_manager_v1 is a labwc-specific protocol that
 reports the workspace each window is on. Waybar's wlr/taskbar needs it, in
 addition to zwlr_foreign_toplevel_manager_v1 and ext_workspace_manager_v1, to
-show exact workspace membership in its group-by-workspace view.
+show exact workspace membership in its group-by-workspace view. Version 2
+also lets such a client move a window to another workspace (Waybar's
+drag-and-drop between workspace boxes); the active workspace is never changed
+by it.
 
 ## ENVIRONMENT VARIABLES
 
