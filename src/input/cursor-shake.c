@@ -5,6 +5,7 @@
 #include <time.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
+#include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include "buffer.h"
 #include "common/mem.h"
@@ -255,6 +256,11 @@ cursor_shake_motion(struct seat *seat, double dx, double dy,
 {
 	struct cursor_shake *shake = &seat->shake;
 	if (!rc.shake_to_find || !has_visible_request(seat)) {
+		return;
+	}
+	/* Not while drawing, selecting, dragging or moving a window */
+	if (seat->wlr_seat->pointer_state.button_count
+			|| server.input_mode != LAB_INPUT_STATE_PASSTHROUGH) {
 		return;
 	}
 	if (!shake_detector_feed(&shake->detector, dx, dy, time_msec)) {
