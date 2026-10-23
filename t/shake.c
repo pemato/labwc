@@ -45,6 +45,19 @@ test_shake_detected(void **state)
 }
 
 static void
+test_moderate_shake_detected(void **state)
+{
+	/* 5 strokes of 60 px, 150 ms each (about 3 Hz) */
+	struct shake_detector d = {0};
+	uint32_t t = 1000;
+	bool hit = false;
+	for (int i = 0; i < 5; i++) {
+		hit = stroke(&d, i % 2 ? -60 : 60, 15, &t);
+	}
+	assert_true(hit);
+}
+
+static void
 test_straight_fast_move_no_shake(void **state)
 {
 	struct shake_detector d = {0};
@@ -68,7 +81,7 @@ test_small_jitter_no_shake(void **state)
 static void
 test_slow_reversals_no_shake(void **state)
 {
-	/* strokes 300 ms apart: reversals fall out of the 500 ms window */
+	/* strokes 300 ms apart: reversals fall out of the 750 ms window */
 	struct shake_detector d = {0};
 	uint32_t t = 1000;
 	bool hit = false;
@@ -107,6 +120,7 @@ int main(int argc, char **argv)
 {
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_shake_detected),
+		cmocka_unit_test(test_moderate_shake_detected),
 		cmocka_unit_test(test_straight_fast_move_no_shake),
 		cmocka_unit_test(test_small_jitter_no_shake),
 		cmocka_unit_test(test_slow_reversals_no_shake),

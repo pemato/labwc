@@ -6,8 +6,8 @@
 #include <stdint.h>
 
 /* A shake: this many direction reversals of strokes this long, in this time */
-#define SHAKE_WINDOW_MS 500
-#define SHAKE_MIN_STROKE 30.0
+#define SHAKE_WINDOW_MS 750
+#define SHAKE_MIN_STROKE 40.0
 #define SHAKE_REVERSALS 4
 
 struct shake_axis {
