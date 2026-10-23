@@ -18,6 +18,7 @@ labwc_sources += files(
   'parse-double.c',
   'scene-helpers.c',
   'set.c',
+  'shake.c',
   'spawn.c',
   'string-helpers.c',
   'xml.c',
