@@ -102,3 +102,13 @@ shake_zoom_tick(struct shake_zoom *zoom, uint32_t now_msec, uint32_t hold_ms)
 	}
 	return SHAKE_FRAME_MS;
 }
+
+float
+shake_buffer_scale(uint32_t big_width, uint32_t normal_width,
+		float output_scale, double factor)
+{
+	if (!big_width || !normal_width || factor <= 0) {
+		return output_scale;
+	}
+	return big_width * output_scale / (factor * normal_width);
+}

@@ -147,6 +147,19 @@ test_zoom_out_animates(void **state)
 	assert_true(t - 3000 <= SHAKE_RAMP_MS + SHAKE_FRAME_MS);
 }
 
+static void
+test_buffer_scale_uses_real_sizes(void **state)
+{
+	/* Adwaita: 24 px normal, 64 px nearest to the 72 px asked for */
+	float scale = shake_buffer_scale(64, 24, 1, 1);
+	assert_true(64 / scale > 23.99 && 64 / scale < 24.01);
+	scale = shake_buffer_scale(64, 24, 1, 3);
+	assert_true(64 / scale > 71.99 && 64 / scale < 72.01);
+	/* On a 2x output the images are twice as wide, the logical size not */
+	scale = shake_buffer_scale(128, 48, 2, 3);
+	assert_true(128 / scale > 71.99 && 128 / scale < 72.01);
+}
+
 int main(int argc, char **argv)
 {
 	const struct CMUnitTest tests[] = {
@@ -158,6 +171,7 @@ int main(int argc, char **argv)
 		cmocka_unit_test(test_vertical_shake_detected),
 		cmocka_unit_test(test_ease_and_progress),
 		cmocka_unit_test(test_zoom_out_animates),
+		cmocka_unit_test(test_buffer_scale_uses_real_sizes),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

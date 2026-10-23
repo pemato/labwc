@@ -43,6 +43,8 @@ struct cursor_shake {
 	char *big_buffer_name;
 	float big_buffer_scale;
 	int32_t big_hotspot_x, big_hotspot_y;
+	uint32_t big_width;
+	uint32_t normal_width; /* of the same shape at its normal size */
 };
 
 /* Replacements for wlr_cursor_set_xcursor/_set_surface/_unset_image */

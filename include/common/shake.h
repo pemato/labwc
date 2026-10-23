@@ -45,6 +45,14 @@ struct shake_zoom {
 uint32_t shake_zoom_tick(struct shake_zoom *zoom, uint32_t now_msec,
 	uint32_t hold_ms);
 
+/*
+ * Buffer scale (buffer pixels per logical pixel) that shows a big_width
+ * pixels wide cursor image `factor` times as big as the normal_width pixels
+ * wide image of the same shape, both loaded for output_scale.
+ */
+float shake_buffer_scale(uint32_t big_width, uint32_t normal_width,
+	float output_scale, double factor);
+
 /* Smoothstep easing of a 0..1 progress */
 double shake_ease(double progress);
 

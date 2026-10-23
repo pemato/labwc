@@ -46,8 +46,9 @@ drop_big_buffer(struct cursor_shake *shake)
 
 /* Loads the image of shape `name` at the big size, false if there is none */
 static bool
-load_big_buffer(struct cursor_shake *shake, const char *name, float scale)
+load_big_buffer(struct seat *seat, const char *name, float scale)
 {
+	struct cursor_shake *shake = &seat->shake;
 	if (shake->big_buffer && scale == shake->big_buffer_scale
 			&& !strcmp(name, shake->big_buffer_name)) {
 		return true;
@@ -71,6 +72,14 @@ load_big_buffer(struct cursor_shake *shake, const char *name, float scale)
 		return false;
 	}
 
+	/* The theme may not have the exact size asked for: compare real sizes */
+	wlr_xcursor_manager_load(seat->xcursor_manager, scale);
+	struct wlr_xcursor *normal = wlr_xcursor_manager_get_xcursor(
+		seat->xcursor_manager, xcursor->name, scale);
+	if (!normal || !normal->image_count) {
+		return false;
+	}
+
 	struct wlr_xcursor_image *image = xcursor->images[0];
 	size_t len = (size_t)image->width * image->height * 4;
 	void *pixels = xzalloc(len);
@@ -81,6 +90,8 @@ load_big_buffer(struct cursor_shake *shake, const char *name, float scale)
 	shake->big_buffer_scale = scale;
 	shake->big_hotspot_x = image->hotspot_x;
 	shake->big_hotspot_y = image->hotspot_y;
+	shake->big_width = image->width;
+	shake->normal_width = normal->images[0]->width;
 	return true;
 }
 
@@ -93,13 +104,13 @@ draw_big(struct seat *seat)
 	const char *name = shake->kind == CURSOR_REQ_XCURSOR && shake->name
 		&& *shake->name ? shake->name : "default";
 	float output_scale = max_output_scale();
-	if (!load_big_buffer(shake, name, output_scale)) {
+	if (!load_big_buffer(seat, name, output_scale)) {
 		return;
 	}
 	double factor = 1 + (rc.shake_to_find_scale - 1)
 		* shake_ease(shake->zoom.progress);
-	/* Buffer pixels per logical pixel */
-	float buffer_scale = rc.shake_to_find_scale * output_scale / factor;
+	float buffer_scale = shake_buffer_scale(shake->big_width,
+		shake->normal_width, output_scale, factor);
 	wlr_cursor_set_buffer(seat->cursor, &shake->big_buffer->base,
 		shake->big_hotspot_x / buffer_scale,
 		shake->big_hotspot_y / buffer_scale, buffer_scale);
