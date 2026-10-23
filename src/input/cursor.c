@@ -198,7 +198,7 @@ handle_request_set_cursor(struct wl_listener *listener, void *data)
 		 * continue to do so as the cursor moves between outputs.
 		 */
 
-		wlr_cursor_set_surface(seat->cursor, event->surface,
+		cursor_image_set_surface(seat, event->surface,
 			event->hotspot_x, event->hotspot_y);
 	}
 }
@@ -245,7 +245,7 @@ handle_request_set_shape(struct wl_listener *listener, void *data)
 	}
 
 	wlr_log(WLR_DEBUG, "set xcursor to shape %s", shape_name);
-	wlr_cursor_set_xcursor(seat->cursor, seat->xcursor_manager, shape_name);
+	cursor_image_set_xcursor(seat, shape_name);
 }
 
 static void
@@ -389,8 +389,7 @@ cursor_set(struct seat *seat, enum lab_cursors cursor)
 	}
 
 	if (seat->cursor_visible) {
-		wlr_cursor_set_xcursor(seat->cursor, seat->xcursor_manager,
-			cursor_names[cursor]);
+		cursor_image_set_xcursor(seat, cursor_names[cursor]);
 	}
 	seat->server_cursor = cursor;
 }
@@ -412,7 +411,7 @@ cursor_update_image(struct seat *seat)
 	enum lab_cursors cursor = seat->server_cursor;
 
 	if (!seat->cursor_visible) {
-		wlr_cursor_unset_image(seat->cursor);
+		cursor_image_unset(seat);
 		return;
 	}
 
@@ -425,7 +424,7 @@ cursor_update_image(struct seat *seat)
 		 */
 		if (seat->wlr_seat->pointer_state.focused_surface) {
 			seat->server_cursor = LAB_CURSOR_DEFAULT;
-			wlr_cursor_set_xcursor(seat->cursor, seat->xcursor_manager, "");
+			cursor_image_set_xcursor(seat, "");
 			wlr_seat_pointer_clear_focus(seat->wlr_seat);
 			cursor_update_focus();
 		}
@@ -437,9 +436,8 @@ cursor_update_image(struct seat *seat)
 	 * wlr_cursor_set_xcursor() may detect that we are setting the
 	 * same cursor as before, and do nothing.
 	 */
-	wlr_cursor_unset_image(seat->cursor);
-	wlr_cursor_set_xcursor(seat->cursor, seat->xcursor_manager,
-		cursor_names[cursor]);
+	cursor_image_unset(seat);
+	cursor_image_set_xcursor(seat, cursor_names[cursor]);
 }
 
 static void
@@ -910,6 +908,7 @@ static void
 preprocess_cursor_motion(struct seat *seat, struct wlr_pointer *pointer,
 		uint32_t time_msec, double dx, double dy)
 {
+	cursor_shake_motion(seat, dx, dy, time_msec);
 	if (cursor_locked(seat, pointer)) {
 		return;
 	}
@@ -1642,6 +1641,7 @@ cursor_load(struct seat *seat)
 void
 cursor_reload(struct seat *seat)
 {
+	cursor_shake_reset(seat);
 	cursor_load(seat);
 	cursor_update_image(seat);
 }
@@ -1649,6 +1649,7 @@ cursor_reload(struct seat *seat)
 void
 cursor_init(struct seat *seat)
 {
+	cursor_shake_init(seat);
 	cursor_load(seat);
 
 	/* Set the initial cursor image so the cursor is visible right away */
@@ -1683,6 +1684,7 @@ cursor_init(struct seat *seat)
 
 void cursor_finish(struct seat *seat)
 {
+	cursor_shake_finish(seat);
 	wl_list_remove(&seat->on_cursor.motion.link);
 	wl_list_remove(&seat->on_cursor.motion_absolute.link);
 	wl_list_remove(&seat->on_cursor.button.link);

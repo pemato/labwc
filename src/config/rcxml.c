@@ -1266,6 +1266,14 @@ entry(xmlNode *node, char *nodename, char *content)
 	} else if (!strcasecmp(nodename, "screenEdgeWarpTime.mouse")) {
 		long val = strtol(content, NULL, 10);
 		rc.screen_edge_warp_time = val > 0 ? (int)val : 0;
+	} else if (!strcasecmp(nodename, "enabled.shakeToFind.mouse")) {
+		set_bool(content, &rc.shake_to_find);
+	} else if (!strcasecmp(nodename, "scale.shakeToFind.mouse")) {
+		double scale = strtod(content, NULL);
+		rc.shake_to_find_scale = scale < 1.5 ? 1.5 : scale > 8 ? 8 : scale;
+	} else if (!strcasecmp(nodename, "duration.shakeToFind.mouse")) {
+		int duration = atoi(content);
+		rc.shake_to_find_duration = duration > 0 ? duration : 0;
 	} else if (!strcasecmp(nodename, "scrollFactor.mouse")) {
 		/* This is deprecated. Show an error message in post_processing() */
 		set_double(content, &mouse_scroll_factor);
@@ -1606,6 +1614,9 @@ rcxml_init(void)
 
 	rc.doubleclick_time = 500;
 	rc.screen_edge_warp_time = 0;
+	rc.shake_to_find = false;
+	rc.shake_to_find_scale = 3.0;
+	rc.shake_to_find_duration = 2000;
 
 	rc.tablet.force_mouse_emulation = false;
 	rc.tablet.output_name = NULL;

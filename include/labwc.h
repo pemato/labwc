@@ -7,6 +7,7 @@
 #include "common/set.h"
 #include "cycle.h"
 #include "input/cursor.h"
+#include "input/cursor-shake.h"
 #include "edge-warp.h"
 #include "overlay.h"
 
@@ -39,6 +40,7 @@ struct seat {
 	bool cursor_visible;
 	struct wlr_cursor *cursor;
 	struct wlr_xcursor_manager *xcursor_manager;
+	struct cursor_shake shake;
 	struct accumulated_scroll {
 		double delta;
 		double delta_discrete;

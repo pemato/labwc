@@ -58,7 +58,7 @@ handle_set_cursor(struct wl_listener *listener, void *data)
 		return;
 	}
 
-	wlr_cursor_set_surface(seat->cursor, ev->surface,
+	cursor_image_set_surface(seat, ev->surface,
 		ev->hotspot_x, ev->hotspot_y);
 }
 
