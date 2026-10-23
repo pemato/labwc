@@ -402,6 +402,9 @@
     <!-- 0 disables switching desktops by dragging a window to the screen edge -->
     <screenEdgeWarpTime>0</screenEdgeWarpTime>
 
+    <!-- shake the mouse to make the pointer bigger for a moment -->
+    <shakeToFind enabled="no" scale="3" duration="2000" />
+
     <context name="Frame">
       <mousebind button="W-Left" action="Press">
         <action name="Focus" />

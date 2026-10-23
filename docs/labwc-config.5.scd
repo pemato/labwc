@@ -925,6 +925,13 @@ input-devices by the Wayland protocol.
 	between outputs, or when edge snapping is disabled (*<snapping><range>*
 	0). Default is 0 (disabled).
 
+*<mouse><shakeToFind enabled="no" scale="3" duration="2000" />*
+	Shake the mouse to make the pointer bigger for a moment, so it is easy
+	to find. *scale* is how many times bigger it gets (1.5 to 8),
+	*duration* how many milliseconds it stays big after the shaking stops.
+	Pointers that an application draws itself are shown as the default
+	arrow while big. Default is disabled.
+
 *<mouse><context name=""><mousebind button="" direction="" action=""
 overrideInhibition=""><action>*
 	Multiple *<mousebind>* can exist within one *<context>*; and multiple
