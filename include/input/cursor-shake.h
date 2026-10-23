@@ -34,10 +34,7 @@ struct cursor_shake {
 	/* The effect */
 	struct shake_detector detector;
 	bool active;
-	bool grow;
-	double progress;
-	uint32_t last_shake_msec;
-	uint32_t last_frame_msec;
+	struct shake_zoom zoom;
 	struct wl_event_source *timer;
 
 	/* The enlarged pointer image */

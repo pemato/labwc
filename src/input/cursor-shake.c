@@ -12,9 +12,6 @@
 #include "labwc.h"
 #include "output.h"
 
-#define ZOOM_RAMP_MS 150
-#define FRAME_MS 16
-
 static uint32_t
 now_msec(void)
 {
@@ -100,7 +97,7 @@ draw_big(struct seat *seat)
 		return;
 	}
 	double factor = 1 + (rc.shake_to_find_scale - 1)
-		* shake_ease(shake->progress);
+		* shake_ease(shake->zoom.progress);
 	/* Buffer pixels per logical pixel */
 	float buffer_scale = rc.shake_to_find_scale * output_scale / factor;
 	wlr_cursor_set_buffer(seat->cursor, &shake->big_buffer->base,
@@ -199,7 +196,7 @@ stop_effect(struct seat *seat)
 		return;
 	}
 	shake->active = false;
-	shake->progress = 0;
+	shake->zoom.progress = 0;
 	if (shake->timer) {
 		wl_event_source_timer_update(shake->timer, 0);
 	}
@@ -230,32 +227,14 @@ handle_timer(void *data)
 {
 	struct seat *seat = data;
 	struct cursor_shake *shake = &seat->shake;
-	uint32_t now = now_msec();
-	uint32_t dt = now - shake->last_frame_msec;
-	shake->last_frame_msec = now;
-
-	uint32_t since_shake = now - shake->last_shake_msec;
-	if (shake->grow && shake->progress >= 1
-			&& since_shake >= (uint32_t)rc.shake_to_find_duration) {
-		shake->grow = false;
-	}
-	shake->progress = shake_progress_step(shake->progress, shake->grow,
-		dt, ZOOM_RAMP_MS);
-	if (!shake->grow && shake->progress <= 0) {
+	uint32_t delay = shake_zoom_tick(&shake->zoom, now_msec(),
+		rc.shake_to_find_duration);
+	if (!delay) {
 		stop_effect(seat);
 		return 0;
 	}
 	draw_big(seat);
-
-	if (shake->grow && shake->progress >= 1) {
-		/* Fully big: wait until the shaking has stopped long enough */
-		uint32_t remaining = since_shake < (uint32_t)rc.shake_to_find_duration
-			? rc.shake_to_find_duration - since_shake : 0;
-		wl_event_source_timer_update(shake->timer,
-			remaining > 0 ? remaining : 1);
-	} else {
-		wl_event_source_timer_update(shake->timer, FRAME_MS);
-	}
+	wl_event_source_timer_update(shake->timer, delay);
 	return 0;
 }
 
@@ -272,8 +251,8 @@ cursor_shake_motion(struct seat *seat, double dx, double dy,
 	}
 
 	uint32_t now = now_msec();
-	shake->last_shake_msec = now;
-	if (shake->active && shake->grow) {
+	shake->zoom.last_shake_msec = now;
+	if (shake->active && shake->zoom.grow) {
 		/* Already growing or big: the timer keeps it big */
 		return;
 	}
@@ -283,11 +262,11 @@ cursor_shake_motion(struct seat *seat, double dx, double dy,
 	}
 	if (!shake->active) {
 		shake->active = true;
-		shake->progress = 0;
-		shake->last_frame_msec = now;
+		shake->zoom.progress = 0;
+		shake->zoom.last_frame_msec = now;
 	}
 	/* Zoom in, also from the middle of a zoom-out */
-	shake->grow = true;
+	shake->zoom.grow = true;
 	wl_event_source_timer_update(shake->timer, 1);
 }
 

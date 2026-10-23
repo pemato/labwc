@@ -76,3 +76,29 @@ shake_progress_step(double progress, bool grow, uint32_t dt_ms,
 	}
 	return progress;
 }
+
+uint32_t
+shake_zoom_tick(struct shake_zoom *zoom, uint32_t now_msec, uint32_t hold_ms)
+{
+	uint32_t dt = now_msec - zoom->last_frame_msec;
+	zoom->last_frame_msec = now_msec;
+
+	uint32_t since_shake = now_msec - zoom->last_shake_msec;
+	if (zoom->grow && zoom->progress >= 1 && since_shake >= hold_ms) {
+		/* The hold is over: the zoom-out starts now, not at the last tick */
+		zoom->grow = false;
+		dt = 0;
+	}
+	zoom->progress = shake_progress_step(zoom->progress, zoom->grow, dt,
+		SHAKE_RAMP_MS);
+	if (!zoom->grow && zoom->progress <= 0) {
+		return 0;
+	}
+	if (zoom->grow && zoom->progress >= 1) {
+		/* Fully big: wait until the shaking has stopped long enough */
+		uint32_t remaining = since_shake < hold_ms
+			? hold_ms - since_shake : 0;
+		return remaining > 0 ? remaining : 1;
+	}
+	return SHAKE_FRAME_MS;
+}

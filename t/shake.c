@@ -116,6 +116,37 @@ test_ease_and_progress(void **state)
 	assert_true(shake_progress_step(0.2, false, 75, 150) == 0);
 }
 
+/* Ticks the animation at the delays it asks for until it is over */
+static void
+test_zoom_out_animates(void **state)
+{
+	struct shake_zoom zoom = {
+		.grow = true, .last_frame_msec = 1000, .last_shake_msec = 1000,
+	};
+	uint32_t t = 1000;
+	uint32_t delay = 1;
+	/* Zoom in, then hold */
+	while (zoom.progress < 1) {
+		t += delay;
+		delay = shake_zoom_tick(&zoom, t, 2000);
+	}
+	assert_true(t - 1000 <= SHAKE_RAMP_MS + SHAKE_FRAME_MS);
+	/* The hold ends 2000 ms after the shake: the zoom-out starts there */
+	t += delay;
+	assert_int_equal(t, 3000);
+	delay = shake_zoom_tick(&zoom, t, 2000);
+	assert_true(zoom.progress > 0.8);
+	/* ...and takes about SHAKE_RAMP_MS */
+	int frames = 0;
+	while (delay) {
+		t += delay;
+		delay = shake_zoom_tick(&zoom, t, 2000);
+		frames++;
+	}
+	assert_true(frames >= SHAKE_RAMP_MS / SHAKE_FRAME_MS - 1);
+	assert_true(t - 3000 <= SHAKE_RAMP_MS + SHAKE_FRAME_MS);
+}
+
 int main(int argc, char **argv)
 {
 	const struct CMUnitTest tests[] = {
@@ -126,6 +157,7 @@ int main(int argc, char **argv)
 		cmocka_unit_test(test_slow_reversals_no_shake),
 		cmocka_unit_test(test_vertical_shake_detected),
 		cmocka_unit_test(test_ease_and_progress),
+		cmocka_unit_test(test_zoom_out_animates),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
