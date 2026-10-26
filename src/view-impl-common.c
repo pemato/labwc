@@ -11,6 +11,12 @@ view_impl_map(struct view *view)
 {
 	view_update_visibility(view);
 
+	/* A sub-view (e.g. dialog) joins the layer of its root view */
+	struct view *root = view_get_root(view);
+	if (root != view && root->layer != view->layer) {
+		view_set_layer(view, root->layer);
+	}
+
 	/* Leave minimized, if minimized before map */
 	if (!view->minimized) {
 		desktop_focus_view(view, /* raise */ true);

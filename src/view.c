@@ -253,7 +253,7 @@ view_matches_query(struct view *view, struct view_query *query)
 	return true;
 }
 
-static struct view *
+struct view *
 view_get_root(struct view *view)
 {
 	assert(view);
@@ -1539,10 +1539,9 @@ view_toggle_decorations(struct view *view)
 	}
 }
 
-void
-view_set_layer(struct view *view, enum view_layer layer)
+static void
+set_layer(struct view *view, enum view_layer layer)
 {
-	assert(view);
 	if (view->layer == layer) {
 		return;
 	}
@@ -1560,11 +1559,36 @@ view_set_layer(struct view *view, enum view_layer layer)
 	wl_signal_emit_mutable(&view->events.always_on_top, NULL);
 }
 
+/*
+ * The layer applies to the whole view hierarchy (root + sub-views such
+ * as dialogs) so that a dialog is never left in a layer below its parent.
+ * The root is moved first and the sub-views after it in back-to-front
+ * order, so the sub-views end up above the root as before.
+ */
+void
+view_set_layer(struct view *view, enum view_layer layer)
+{
+	assert(view);
+	struct view *root = view_get_root(view);
+	assert(root);
+
+	set_layer(root, layer);
+
+	struct wl_array subviews;
+	struct view **subview;
+	wl_array_init(&subviews);
+	view_append_children(root, &subviews);
+	wl_array_for_each(subview, &subviews) {
+		set_layer(*subview, layer);
+	}
+	wl_array_release(&subviews);
+}
+
 void
 view_toggle_always_on_top(struct view *view)
 {
 	assert(view);
-	if (view->layer == VIEW_LAYER_ALWAYS_ON_TOP) {
+	if (view_get_root(view)->layer == VIEW_LAYER_ALWAYS_ON_TOP) {
 		view_set_layer(view, VIEW_LAYER_NORMAL);
 	} else {
 		view_set_layer(view, VIEW_LAYER_ALWAYS_ON_TOP);
@@ -1575,7 +1599,7 @@ void
 view_toggle_always_on_bottom(struct view *view)
 {
 	assert(view);
-	if (view->layer == VIEW_LAYER_ALWAYS_ON_BOTTOM) {
+	if (view_get_root(view)->layer == VIEW_LAYER_ALWAYS_ON_BOTTOM) {
 		view_set_layer(view, VIEW_LAYER_NORMAL);
 	} else {
 		view_set_layer(view, VIEW_LAYER_ALWAYS_ON_BOTTOM);

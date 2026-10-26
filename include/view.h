@@ -560,6 +560,9 @@ void view_toggle_maximize(struct view *view, enum view_axis axis);
 bool view_wants_decorations(struct view *view);
 void view_toggle_decorations(struct view *view);
 
+/* Returns the most senior parent of a view (the view itself when it has none) */
+struct view *view_get_root(struct view *view);
+/* Sets the layer of the whole view hierarchy that view belongs to */
 void view_set_layer(struct view *view, enum view_layer layer);
 void view_toggle_always_on_top(struct view *view);
 void view_toggle_always_on_bottom(struct view *view);
