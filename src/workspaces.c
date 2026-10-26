@@ -248,7 +248,7 @@ add_workspace(const char *name)
 	 * renamed in place, so the id is unique and stable for the lifetime of
 	 * the workspace (and keeps clients that sort by id in configured order).
 	 */
-	char *id = strdup_printf("%zu", wl_list_length(&server.workspaces.all));
+	char *id = strdup_printf("%d", wl_list_length(&server.workspaces.all));
 	workspace->ext_workspace = wlr_ext_workspace_handle_v1_create(
 		server.workspaces.ext_manager, id,
 		EXT_WORKSPACE_HANDLE_V1_WORKSPACE_CAPABILITIES_ACTIVATE);
