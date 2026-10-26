@@ -1549,6 +1549,13 @@ view_set_layer(struct view *view, enum view_layer layer)
 	view->layer = layer;
 	wlr_scene_node_reparent(&view->scene_tree->node,
 		view->workspace->view_trees[layer]);
+	/*
+	 * Reparenting puts the view on top of its new layer tree. Keep
+	 * server.views in sync so that view_move_to_front() does not
+	 * consider a view that is now underneath to still be in front.
+	 */
+	wl_list_remove(&view->link);
+	wl_list_insert(&server.views, &view->link);
 
 	wl_signal_emit_mutable(&view->events.always_on_top, NULL);
 }
